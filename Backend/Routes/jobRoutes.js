@@ -5,11 +5,6 @@ const Job = require("../Models/job.js");
 
 router.post("/", async (req, res) => {
 
-    const { title, company, location } = req.body;
-    if (!title || !company || !location) {
-        return res.status(400).json({ message: "title, company, and location are required" });
-    }
-
     try {
 
         const newJob = new Job(req.body);
@@ -24,5 +19,17 @@ router.post("/", async (req, res) => {
 
 });
 
+
+router.get("/", async (req, res) => {
+
+    try{
+        const jobs = await Job.find();
+        res.json(jobs);
+
+    }catch (err) {
+        console.log(err);
+        res.status(500).json({ message: "Failed to fetch jobs" });
+    }
+});
 
 module.exports = router;
