@@ -4,16 +4,17 @@ const app = express();
 const connectDB = require("./Config/db.js")
 connectDB();
 
+app.use(express.json());
 
-const job = require("./Models/job.js");
-/*const testJob = new job({
-    title: "Frontend Developer",
-    company: "XYZ Company",
-    location: "Bangalore",
-    description: "Work on React projects"
-});*/
 
-console.log(testJob);
+const Job = require("./Models/job.js");
+
+
+const jobRoutes = require("./Routes/jobRoutes.js");
+app.use("/api/jobs", jobRoutes);
+
+
+
 
 app.get("/", (req, res) => {
     res.send("This Is Root Page");
