@@ -6,6 +6,10 @@ connectDB();
 
 app.use(express.json());
 
+const cors = require("cors");
+app.use(cors());
+
+
 
 const Job = require("./Models/job.js");
 
