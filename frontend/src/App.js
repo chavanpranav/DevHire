@@ -6,6 +6,8 @@ function App() {
   const [title, setTitle] = useState("");
   const [company, setCompany] = useState("");
   const [location, setLocation] = useState("");
+  const [user, setUser] = useState(null);
+
 
   // fetch jobs
   const fetchJobs = () => {
@@ -37,7 +39,11 @@ function App() {
   // delete function
   const handleDelete = (id) => {
     fetch(`http://localhost:8080/api/jobs/${id}`, {
-      method: "DELETE"
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+        "role": user?.role
+      }
     })
       .then(() => fetchJobs());
   };
@@ -49,10 +55,26 @@ function App() {
 
     fetch(`http://localhost:8080/api/jobs/${job._id}`, {
       method: "PUT",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        "role": user?.role
+      },
       body: JSON.stringify({ ...job, title: newTitle })
     })
       .then(() => fetchJobs());
+  };
+
+  const login = () => {
+    fetch("http://localhost:5000/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        email: "admin@test.com",
+        password: "1234"
+      })
+    })
+      .then(res => res.json())
+      .then(data => setUser(data));
   };
 
 
@@ -89,8 +111,13 @@ function App() {
         {jobs.map(job => (
           <li key={job._id}>
             {job.title} - {job.company} ({job.location})
-            <button onClick={() => handleEdit(job)}>Edit</button>
-            <button onClick={() => handleDelete(job._id)}>Delete</button>
+            {user?.role === "admin" && (
+              <>
+                <button onClick={() => handleEdit(job)}>Edit</button>
+                <button onClick={() => handleDelete(job._id)}>Delete</button>
+              </>
+            )}
+
           </li>
         ))}
       </ul>

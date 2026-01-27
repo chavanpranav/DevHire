@@ -11,13 +11,14 @@ app.use(cors());
 
 
 
-const Job = require("./Models/job.js");
+const Job = require("./Models/Job.js");
 
 
 const jobRoutes = require("./Routes/jobRoutes.js");
 app.use("/api/jobs", jobRoutes);
 
-
+const authRoutes = require("./Routes/authRoutes.js");
+app.use("api/", authRoutes);
 
 
 app.get("/", (req, res) => {

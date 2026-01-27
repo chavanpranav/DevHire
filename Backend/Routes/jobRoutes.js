@@ -1,9 +1,10 @@
 const express = require("express");
 const router = express.Router();
 
-const Job = require("../Models/job.js");
+const Job = require("../Models/Job.js");
+const isAdmin = require("../Middleware/isAdmin.js");
 
-router.post("/", async (req, res) => {
+router.post("/", isAdmin, async (req, res) => {
 
     try {
 
@@ -33,7 +34,7 @@ router.get("/", async (req, res) => {
 });
 
 
-router.put("/:id", async (req, res) => {
+router.put("/:id", isAdmin, async (req, res) => {
 
     try {
 
@@ -47,14 +48,14 @@ router.put("/:id", async (req, res) => {
 });
 
 
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", isAdmin, async (req, res) => {
 
     try {
 
         const deletedJob = await Job.findByIdAndDelete(req.params.id);
 
         res.json({message : "Job deleted"})
-        
+
     }catch (error) {
         res.status(500).json({ message: "Failed to delete job" });
     }
