@@ -2,25 +2,30 @@ import { useEffect, useState } from "react";
 
 function App() {
 
+  // Job Data States
   const [jobs, setJobs] = useState([]);
   const [title, setTitle] = useState("");
   const [company, setCompany] = useState("");
   const [location, setLocation] = useState("");
+
+  // Auth States
   const [user, setUser] = useState(null);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
-
-  // fetch jobs
+  // ================= FETCH JOBS =================
   const fetchJobs = () => {
     fetch("http://localhost:8080/api/jobs")
       .then(res => res.json())
-      .then(data => setJobs(data));
+      .then(data => setJobs(data))
+      .catch(err => console.log(err));
   };
 
   useEffect(() => {
     fetchJobs();
   }, []);
 
-  // handle form submit
+  // ================= ADD JOB =================
   const handleSubmit = (e) => {
     e.preventDefault();
 
@@ -30,25 +35,26 @@ function App() {
       body: JSON.stringify({ title, company, location })
     })
       .then(res => res.json())
-      .then(data => {
-        fetchJobs(); // refresh list
-        setTitle(""); setCompany(""); setLocation("");
+      .then(() => {
+        fetchJobs();
+        setTitle("");
+        setCompany("");
+        setLocation("");
       });
   };
 
-  // delete function
+  // ================= DELETE JOB =================
   const handleDelete = (id) => {
     fetch(`http://localhost:8080/api/jobs/${id}`, {
       method: "DELETE",
       headers: {
         "Content-Type": "application/json",
-        "role": user?.role
+        role: user?.role
       }
-    })
-      .then(() => fetchJobs());
+    }).then(() => fetchJobs());
   };
 
-  // update function (simple example: change title)
+  // ================= EDIT JOB =================
   const handleEdit = (job) => {
     const newTitle = prompt("Enter new title", job.title);
     if (!newTitle) return;
@@ -57,67 +63,124 @@ function App() {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
-        "role": user?.role
+        role: user?.role
       },
-      body: JSON.stringify({ ...job, title: newTitle })
-    })
-      .then(() => fetchJobs());
+      body: JSON.stringify({
+        title: newTitle,
+        company: job.company,
+        location: job.location
+      })
+    }).then(() => fetchJobs());
   };
 
-  const login = () => {
-    fetch("http://localhost:5000/login", {
+  // ================= LOGIN =================
+  const handleLogin = (e) => {
+    e.preventDefault();
+
+    fetch("http://localhost:8080/api/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        email: "admin@test.com",
-        password: "1234"
-      })
+      body: JSON.stringify({ email, password })
     })
-      .then(res => res.json())
-      .then(data => setUser(data));
+      .then(res => {
+        if (!res.ok) throw new Error("Login Failed");
+        return res.json();
+      })
+      .then(data => {
+        setUser(data);
+        alert(`Logged in as ${data.role}`);
+      })
+      .catch(() => alert("Invalid Credentials"));
   };
 
+  // ================= LOGOUT =================
+  const handleLogout = () => {
+    setUser(null);
+  };
 
+  // ================= UI =================
   return (
-    <div>
-      <h1>Job List</h1>
+    <div style={{ padding: "20px" }}>
 
-      <form onSubmit={handleSubmit}>
+      <h1>Job Portal</h1>
+
+      {/* LOGIN SECTION */}
+      {!user ? (
+        <form
+          onSubmit={handleLogin}
+          style={{
+            border: "1px solid #ccc",
+            padding: "15px",
+            marginBottom: "20px",
+            width: "300px"
+          }}
+        >
+          <h3>Login</h3>
+
+          <input
+            placeholder="Email"
+            value={email}
+            onChange={e => setEmail(e.target.value)}
+            style={{ display: "block", marginBottom: "10px", width: "100%" }}
+          />
+
+          <input
+            type="password"
+            placeholder="Password"
+            value={password}
+            onChange={e => setPassword(e.target.value)}
+            style={{ display: "block", marginBottom: "10px", width: "100%" }}
+          />
+
+          <button type="submit">Login</button>
+        </form>
+      ) : (
+        <div style={{ marginBottom: "20px" }}>
+          <p>
+            Welcome, {user.email} ({user.role})
+          </p>
+          <button onClick={handleLogout}>Logout</button>
+        </div>
+      )}
+
+      {/* ADD JOB FORM */}
+      <form onSubmit={handleSubmit} style={{ marginBottom: "20px" }}>
         <input
-          type="text"
-          placeholder="Title"
+          placeholder="Job Title"
           value={title}
           onChange={e => setTitle(e.target.value)}
           required
         />
+
         <input
-          type="text"
           placeholder="Company"
           value={company}
           onChange={e => setCompany(e.target.value)}
           required
         />
+
         <input
-          type="text"
           placeholder="Location"
           value={location}
           onChange={e => setLocation(e.target.value)}
           required
         />
+
         <button type="submit">Add Job</button>
       </form>
 
+      {/* JOB LIST */}
       <ul>
         {jobs.map(job => (
           <li key={job._id}>
             {job.title} - {job.company} ({job.location})
+
             {user?.role === "admin" && (
               <>
                 <button onClick={() => handleEdit(job)}>Edit</button>
                 <button onClick={() => handleDelete(job._id)}>Delete</button>
               </>
             )}
-
           </li>
         ))}
       </ul>
