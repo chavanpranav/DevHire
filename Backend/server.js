@@ -1,19 +1,19 @@
-const express = require("express");
+import express from "express";
 const app = express();
 
-const connectDB = require("./Config/db.js")
+import connectDB from "./Config/db.js";
 connectDB();
 
 app.use(express.json());
 
 
-const cors = require("cors");
+import cors from "cors";
 app.use(cors());
 
-const Job = require("./Models/Job.js");
-const jobRoutes = require("./Routes/jobRoutes.js");
-const authRoutes = require("./Routes/authRoutes.js");
-const signUpRoutes = require("./Routes/signUpRoutes.js");
+import Job from "./Models/Job.js";
+import jobRoutes from "./Routes/jobRoutes.js";
+import authRoutes from "./Routes/authRoutes.js";
+import signUpRoutes from "./Routes/signUpRoutes.js";
 
 
 

@@ -1,12 +1,12 @@
-const express = require("express");
+import express from "express";
 const router = express.Router();
 
-const Job = require("../Models/Job.js");
-const isAdmin = require("../Middleware/isAdmin.js");
+import Job from "../Models/Job.js";
 
+import auth from "../Middleware/auth.js";
+import isAdmin from "../Middleware/isAdmin.js";
 
-
-router.post("/", isAdmin, async (req, res) => {
+router.post("/", auth, isAdmin, async (req, res) => {
     try {
 
         const newJob = new Job(req.body);
@@ -32,7 +32,7 @@ router.get("/", async (req, res) => {
 });
 
 
-router.put("/:id", isAdmin, async (req, res) => {
+router.put("/:id", auth, isAdmin, async (req, res) => {
     try {
         const updatedJob = await Job.findByIdAndUpdate (req.params.id, req.body);
         res.json(updatedJob);
@@ -43,7 +43,7 @@ router.put("/:id", isAdmin, async (req, res) => {
 });
 
 
-router.delete("/:id", isAdmin, async (req, res) => {
+router.delete("/:id", auth, isAdmin, async (req, res) => {
     try {
         const deletedJob = await Job.findByIdAndDelete(req.params.id);
         res.json({message : "Job deleted"})
@@ -54,4 +54,5 @@ router.delete("/:id", isAdmin, async (req, res) => {
 });
 
 
-module.exports = router;
+
+export default router;

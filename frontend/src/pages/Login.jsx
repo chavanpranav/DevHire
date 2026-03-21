@@ -19,13 +19,23 @@ function Login() {
 
     if (res.ok) {
       const data = await res.json();
-      setUser({ token: data.token, role: data.role }); // set user
+
+      // store token + role
+      setUser({
+        token: data.token,
+        role: data.role
+      });
+
+      // redirect
       if (data.role === "admin") navigate("/admin");
-      else navigate("/"); // normal user
+      else navigate("/");
     } else {
       alert("Invalid credentials");
     }
+
   };
+
+
 
   return (
     <form onSubmit={handleLogin}>
