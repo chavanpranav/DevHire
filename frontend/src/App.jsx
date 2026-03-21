@@ -1,31 +1,37 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { useContext } from "react";
+import { AuthContext } from "./context/AuthContext";
+
 import Login from "./pages/Login";
+import Signup from "./pages/Signup";
 import Jobs from "./pages/Jobs";
 import Admin from "./pages/Admin";
+import Navbar from "./components/Navbar";
 
 function App() {
+  const { user } = useContext(AuthContext);
+
   return (
     <BrowserRouter>
+      {/* Navbar shows at the top of every page */}
+      <Navbar /> 
+      
       <Routes>
-        <Route path="/" element={<Jobs />} />
+        {/* If user is NOT logged in, redirect them to the Login page */}
+        <Route 
+          path="/" 
+          element={user ? <Jobs /> : <Navigate to="/login" />} 
+        />
+        
+        {/* Separate Auth Pages */}
         <Route path="/login" element={<Login />} />
-        <Route path="/admin" element={<Admin />} />
+        <Route path="/signup" element={<Signup />} />
+        
+        {/* Admin Page */}
+        <Route path="/admin" element={user && user.role === "admin" ? <Admin /> : <Navigate to="/" />} />
       </Routes>
     </BrowserRouter>
   );
 }
 
 export default App;
-
-
-import ProtectedRoute from "./components/ProtectedRoute";
-
-<Route
-  path="/admin"
-  element={
-    <ProtectedRoute>
-      <Admin />
-    </ProtectedRoute>
-  }
-/>
-

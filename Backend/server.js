@@ -8,7 +8,8 @@ app.use(express.json());
 
 
 import cors from "cors";
-app.use(cors());
+app.use(cors()); 
+app.use(express.json());
 
 import Job from "./Models/Job.js";
 import jobRoutes from "./Routes/jobRoutes.js";
