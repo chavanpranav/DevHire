@@ -16,8 +16,7 @@ import jobRoutes from "./Routes/jobRoutes.js";
 import authRoutes from "./Routes/authRoutes.js";
 import signUpRoutes from "./Routes/signUpRoutes.js";
 
-
-
+import applicationRoutes from "./Routes/applicationRoutes.js";
 
 
 app.use("/api/jobs", jobRoutes);
@@ -25,6 +24,8 @@ app.use("/api/jobs", jobRoutes);
 app.use("/api", authRoutes);
 
 app.use("/api", signUpRoutes);
+
+app.use("/api/applications", applicationRoutes);
 
 app.get("/", (req, res) => {
     res.send("This Is Root Page");
