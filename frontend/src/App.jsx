@@ -6,6 +6,7 @@ import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import Jobs from "./pages/Jobs";
 import Admin from "./pages/Admin";
+import UserDashboard from "./pages/UserDashboard"; // <-- Add this line right here!
 import Navbar from "./components/Navbar";
 
 function App() {
@@ -27,8 +28,11 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
         
-        {/* Admin Page */}
-        <Route path="/admin" element={user && user.role === "admin" ? <Admin /> : <Navigate to="/" />} />
+        {/* Admin/Company Page */}
+        <Route path="/admin" element={user && (user.role === "ADMIN" || user.role === "COMPANY") ? <Admin /> : <Navigate to="/" />} />
+
+        {/* User Dashboard Page */}
+        <Route path="/dashboard" element={user && user.role === "USER" ? <UserDashboard /> : <Navigate to="/" />} />
       </Routes>
     </BrowserRouter>
   );

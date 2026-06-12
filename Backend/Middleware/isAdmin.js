@@ -1,8 +1,9 @@
 const isAdmin = (req, res, next) => {
-  if (req.user.role === "admin") {
+  // Check for both uppercase COMPANY and ADMIN roles
+  if (req.user && (req.user.role === "ADMIN" || req.user.role === "COMPANY")) {
     next();
   } else {
-    res.status(403).json({ message: "Admin only" });
+    res.status(403).json({ message: "Admin or Company permissions required" });
   }
 };
 
