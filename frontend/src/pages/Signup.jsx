@@ -99,14 +99,24 @@ function Signup() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [role, setRole] = useState("USER"); // Uppercase to match backend Enum
+  const [companyName, setCompanyName] = useState("");
+  const [description, setDescription] = useState("");
 
   const handleSignup = async (e) => {
     e.preventDefault();
 
-    const res = await fetch("http://localhost:8080/api/signup", {
+    const url = role === "COMPANY" 
+      ? "http://localhost:8080/api/company/register" 
+      : "http://localhost:8080/api/signup";
+
+    const bodyData = role === "COMPANY"
+      ? { name, email, password, companyName, description }
+      : { name, email, password, role };
+
+    const res = await fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, email, password, role }), 
+      body: JSON.stringify(bodyData), 
     });
 
     if (res.ok) {
@@ -176,6 +186,38 @@ function Signup() {
               <option value="COMPANY">Employer / Admin</option>
             </select>
           </div>
+
+          {role === "COMPANY" && (
+            <>
+              <div className="input-group">
+                <label>Company Name</label>
+                <input
+                  type="text"
+                  placeholder="Enter your company name"
+                  value={companyName}
+                  onChange={(e) => setCompanyName(e.target.value)}
+                  required
+                />
+              </div>
+
+              <div className="input-group">
+                <label>Company Description</label>
+                <textarea
+                  placeholder="Enter company description"
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  rows="3"
+                  style={{
+                    padding: "0.75rem",
+                    border: "1px solid var(--border)",
+                    borderRadius: "8px",
+                    fontFamily: "inherit"
+                  }}
+                  required
+                />
+              </div>
+            </>
+          )}
 
           <button type="submit" className="btn-primary">Sign Up</button>
           

@@ -86,6 +86,11 @@ function Navbar() {
             {(user.role === "ADMIN" || user.role === "COMPANY") && (
               <Link to="/admin">Dashboard</Link>
             )}
+
+            {/* Show My Applications link for User role */}
+            {user.role === "USER" && (
+              <Link to="/dashboard">My Applications</Link>
+            )}
             
             <button 
               onClick={handleLogout}

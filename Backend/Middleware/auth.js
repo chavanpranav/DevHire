@@ -1,21 +1,70 @@
 import jwt from "jsonwebtoken";
 
-const auth = (req, res, next) => {
-  const authHeader = req.headers.authorization;
+/**
+ * Verify JWT Token
+ */
 
-  if (!authHeader) {
-    return res.status(401).json({ message: "No token" });
-  }
-
-  const token = authHeader.split(" ")[1];
-
+export const authMiddleware = async (req, res, next) => {
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const authHeader = req.headers.authorization;
+
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      return res.status(401).json({
+        success: false,
+        message: "Access denied. No token provided.",
+      });
+    }
+
+    const token = authHeader.split(" ")[1];
+
+    const decoded = jwt.verify(
+      token,
+      process.env.JWT_SECRET
+    );
+
     req.user = decoded;
+
     next();
-  } catch (err) {
-    res.status(401).json({ message: "Invalid token" });
+  } catch (error) {
+    return res.status(401).json({
+      success: false,
+      message: "Invalid or expired token.",
+    });
   }
 };
 
-export default auth;
+/**
+ * Role Based Access Control (RBAC)
+ *
+ * Example:
+ * roleMiddleware("ADMIN")
+ * roleMiddleware("COMPANY")
+ * roleMiddleware("ADMIN", "COMPANY")
+ */
+
+export const roleMiddleware = (...allowedRoles) => {
+  return (req, res, next) => {
+    try {
+      if (!req.user) {
+        return res.status(401).json({
+          success: false,
+          message: "Unauthorized.",
+        });
+      }
+
+      if (!allowedRoles.includes(req.user.role)) {
+        return res.status(403).json({
+          success: false,
+          message: "Forbidden. Insufficient permissions.",
+        });
+      }
+
+      next();
+    } catch (error) {
+      return res.status(500).json({
+        success: false,
+        message: "Authorization error.",
+      });
+    }
+  };
+};
