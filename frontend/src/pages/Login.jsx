@@ -152,6 +152,58 @@ function Login() {
           </div>
 
         </form>
+
+        <div style={{ marginTop: "1.5rem", borderTop: "1px solid var(--border)", paddingTop: "1.2rem" }}>
+          <h4 style={{ margin: "0 0 0.75rem 0", color: "var(--text-light)", fontSize: "0.82rem", fontWeight: "600", textTransform: "uppercase", letterSpacing: "0.5px" }}>
+            Prototype Accounts
+          </h4>
+          <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+            <button
+              type="button"
+              onClick={() => { setEmail("admin@devhire.com"); setPassword("admin123"); }}
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                padding: "0.55rem 0.75rem",
+                borderRadius: "8px",
+                border: "1px solid var(--border)",
+                backgroundColor: "var(--bg-color)",
+                fontSize: "0.82rem",
+                cursor: "pointer",
+                transition: "all 0.2s",
+                textAlign: "left"
+              }}
+              onMouseEnter={(e) => { e.currentTarget.style.borderColor = "var(--primary)"; e.currentTarget.style.backgroundColor = "#fff"; }}
+              onMouseLeave={(e) => { e.currentTarget.style.borderColor = "var(--border)"; e.currentTarget.style.backgroundColor = "var(--bg-color)"; }}
+            >
+              <span style={{ fontWeight: "600", color: "var(--primary)" }}>System Admin</span>
+              <span style={{ color: "var(--text-light)", fontSize: "0.78rem" }}>admin@devhire.com (pw: admin123)</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => { setEmail("cand_12345@test.com"); setPassword("password123"); }}
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                padding: "0.55rem 0.75rem",
+                borderRadius: "8px",
+                border: "1px solid var(--border)",
+                backgroundColor: "var(--bg-color)",
+                fontSize: "0.82rem",
+                cursor: "pointer",
+                transition: "all 0.2s",
+                textAlign: "left"
+              }}
+              onMouseEnter={(e) => { e.currentTarget.style.borderColor = "var(--primary)"; e.currentTarget.style.backgroundColor = "#fff"; }}
+              onMouseLeave={(e) => { e.currentTarget.style.borderColor = "var(--border)"; e.currentTarget.style.backgroundColor = "var(--bg-color)"; }}
+            >
+              <span style={{ fontWeight: "600", color: "#10b981" }}>Job Seeker</span>
+              <span style={{ color: "var(--text-light)", fontSize: "0.78rem" }}>cand_12345@test.com (pw: password123)</span>
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   );

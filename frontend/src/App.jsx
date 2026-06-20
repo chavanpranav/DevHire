@@ -13,9 +13,12 @@ import Navbar from "./components/Navbar";
 function App() {
   const { user } = useContext(AuthContext);
 
+  // Hide global Navbar for ADMIN and COMPANY roles
+  const showNavbar = !user || (user.role !== "ADMIN" && user.role !== "COMPANY");
+
   return (
     <BrowserRouter>
-      <Navbar />
+      {showNavbar && <Navbar />}
 
       <Routes>
         {/* Public job listing — redirect to login if not logged in */}

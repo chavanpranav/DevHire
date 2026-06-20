@@ -115,6 +115,126 @@ function ConfirmModal({ company, onConfirm, onCancel }) {
   );
 }
 
+function RegisterCompanyModal({ onConfirm, onCancel }) {
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [companyName, setCompanyName] = useState("");
+  const [description, setDescription] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError("");
+    try {
+      const res = await fetch(`${BASE_URL}/api/company/register`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, email, password, companyName, description })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        onConfirm();
+      } else {
+        setError(data.message || "Failed to register company.");
+      }
+    } catch {
+      setError("Network error. Failed to reach server.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="admin-modal-overlay" onClick={onCancel}>
+      <div className="admin-modal" style={{ maxWidth: "450px" }} onClick={(e) => e.stopPropagation()}>
+        <h3>Register New Company</h3>
+        <p style={{ color: "var(--admin-muted)", fontSize: "0.85rem", marginBottom: "1.2rem" }}>
+          Create a new company along with its default employer account.
+        </p>
+
+        {error && (
+          <div style={{ backgroundColor: "#fee2e2", color: "#991b1b", padding: "0.75rem", borderRadius: "8px", fontSize: "0.85rem", marginBottom: "1rem", fontWeight: "500" }}>
+            {error}
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit}>
+          <div style={{ display: "flex", gap: "0.75rem", marginBottom: "0.75rem" }}>
+            <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
+              <label style={{ fontSize: "0.75rem", fontWeight: "600", color: "var(--admin-muted)", marginBottom: "0.25rem" }}>Owner Name</label>
+              <input 
+                type="text" 
+                required 
+                placeholder="John Doe"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                style={{ padding: "0.6rem", borderRadius: "6px", border: "1px solid var(--admin-border)", background: "var(--admin-surface)", color: "var(--admin-text)" }}
+              />
+            </div>
+            <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
+              <label style={{ fontSize: "0.75rem", fontWeight: "600", color: "var(--admin-muted)", marginBottom: "0.25rem" }}>Owner Email</label>
+              <input 
+                type="email" 
+                required 
+                placeholder="john@company.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                style={{ padding: "0.6rem", borderRadius: "6px", border: "1px solid var(--admin-border)", background: "var(--admin-surface)", color: "var(--admin-text)" }}
+              />
+            </div>
+          </div>
+
+          <div style={{ display: "flex", flexDirection: "column", marginBottom: "0.75rem" }}>
+            <label style={{ fontSize: "0.75rem", fontWeight: "600", color: "var(--admin-muted)", marginBottom: "0.25rem" }}>Owner Password</label>
+            <input 
+              type="password" 
+              required 
+              placeholder="••••••••"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              style={{ padding: "0.6rem", borderRadius: "6px", border: "1px solid var(--admin-border)", background: "var(--admin-surface)", color: "var(--admin-text)" }}
+            />
+          </div>
+
+          <div style={{ display: "flex", flexDirection: "column", marginBottom: "0.75rem" }}>
+            <label style={{ fontSize: "0.75rem", fontWeight: "600", color: "var(--admin-muted)", marginBottom: "0.25rem" }}>Company Name</label>
+            <input 
+              type="text" 
+              required 
+              placeholder="Acme Corp"
+              value={companyName}
+              onChange={(e) => setCompanyName(e.target.value)}
+              style={{ padding: "0.6rem", borderRadius: "6px", border: "1px solid var(--admin-border)", background: "var(--admin-surface)", color: "var(--admin-text)" }}
+            />
+          </div>
+
+          <div style={{ display: "flex", flexDirection: "column", marginBottom: "1.2rem" }}>
+            <label style={{ fontSize: "0.75rem", fontWeight: "600", color: "var(--admin-muted)", marginBottom: "0.25rem" }}>Company Description</label>
+            <textarea 
+              required 
+              rows="3"
+              placeholder="What does this company do?"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              style={{ padding: "0.6rem", borderRadius: "6px", border: "1px solid var(--admin-border)", background: "var(--admin-surface)", color: "var(--admin-text)", fontFamily: "inherit", resize: "vertical" }}
+            />
+          </div>
+
+          <div className="admin-modal-actions">
+            <button type="button" className="admin-modal-cancel" onClick={onCancel} disabled={loading}>Cancel</button>
+            <button type="submit" className="admin-modal-confirm" style={{ backgroundColor: "#4f46e5" }} disabled={loading}>
+              {loading ? "Registering..." : "Register Company"}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
 // ─── Stat Card ────────────────────────────────────────────────────────────────
 
 function StatCard({ label, value, icon, color, bg, loading }) {
@@ -137,6 +257,7 @@ function CompaniesView({ token, onToast }) {
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("all"); // all | verified | unverified
   const [confirmDelete, setConfirmDelete] = useState(null);
+  const [showRegisterModal, setShowRegisterModal] = useState(false);
   const [actionLoading, setActionLoading] = useState(null);
 
   const fetchCompanies = useCallback(async () => {
@@ -224,9 +345,45 @@ function CompaniesView({ token, onToast }) {
         />
       )}
 
-      <div className="admin-header">
-        <h1>Company Management</h1>
-        <p>View, verify, and manage all registered companies on the platform.</p>
+      {showRegisterModal && (
+        <RegisterCompanyModal
+          onConfirm={() => {
+            fetchCompanies();
+            setShowRegisterModal(false);
+            onToast("Company registered successfully!", "success");
+          }}
+          onCancel={() => setShowRegisterModal(false)}
+        />
+      )}
+
+      <div className="admin-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <div>
+          <h1>Company Management</h1>
+          <p>View, verify, and manage all registered companies on the platform.</p>
+        </div>
+        <button 
+          onClick={() => setShowRegisterModal(true)} 
+          className="admin-btn-add"
+          style={{
+            backgroundColor: "#4f46e5",
+            color: "#fff",
+            border: "none",
+            borderRadius: "8px",
+            padding: "0.6rem 1.2rem",
+            fontWeight: "600",
+            cursor: "pointer",
+            display: "flex",
+            alignItems: "center",
+            gap: "0.5rem",
+            boxShadow: "0 2px 4px rgba(79, 70, 229, 0.2)"
+          }}
+        >
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <line x1="12" y1="5" x2="12" y2="19" />
+            <line x1="5" y1="12" x2="19" y2="12" />
+          </svg>
+          Register Company
+        </button>
       </div>
 
       <div className="admin-section">

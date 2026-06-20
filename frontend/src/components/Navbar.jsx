@@ -80,7 +80,9 @@ function Navbar() {
         
         {user ? (
           <>
-            <Link to="/">Jobs</Link>
+            {user.role === "USER" && (
+              <Link to="/">Jobs</Link>
+            )}
             
             {/* Admin panel link for ADMIN role only */}
             {user.role === "ADMIN" && (
