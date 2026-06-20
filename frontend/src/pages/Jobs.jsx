@@ -51,15 +51,58 @@ import { AuthContext } from "../context/AuthContext";
 
 const BASE_URL = "http://localhost:8080";
 
+// ─── SVG Icons ────────────────────────────────────────────────────────────────
+
+const IconSearch = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: 18, height: 18 }}>
+    <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
+  </svg>
+);
+
+const IconMapPin = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: 16, height: 16, marginRight: 6, verticalAlign: "middle" }}>
+    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+    <circle cx="12" cy="10" r="3" />
+  </svg>
+);
+
+const IconDollar = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: 16, height: 16, marginRight: 6, verticalAlign: "middle" }}>
+    <line x1="12" y1="1" x2="12" y2="23" /><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+  </svg>
+);
+
+const IconBriefcase = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: 16, height: 16, marginRight: 6, verticalAlign: "middle" }}>
+    <rect x="2" y="7" width="20" height="14" rx="2" ry="2" />
+    <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
+  </svg>
+);
+
+const IconCheck = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ width: 14, height: 14 }}>
+    <polyline points="20 6 9 17 4 12" />
+  </svg>
+);
+
 function Jobs() {
   const [jobs, setJobs] = useState([]);
   const [appliedJobIds, setAppliedJobIds] = useState([]);
+  const [search, setSearch] = useState("");
+  const [selectedJobId, setSelectedJobId] = useState(null);
   const { user } = useContext(AuthContext);
 
   useEffect(() => {
-    fetch(`${BASE_URL}/api/jobs`) 
+    fetch(`${BASE_URL}/api/jobs`)
       .then((res) => res.json())
-      .then((data) => setJobs(data))
+      .then((data) => {
+        if (Array.isArray(data)) {
+          setJobs(data);
+          if (data.length > 0) {
+            setSelectedJobId(data[0]._id);
+          }
+        }
+      })
       .catch((err) => console.error("Error fetching jobs:", err));
   }, []);
 
@@ -70,16 +113,16 @@ function Jobs() {
           "Authorization": `Bearer ${user.token}`
         }
       })
-      .then((res) => res.json())
-      .then((data) => {
-        if (Array.isArray(data)) {
-          const ids = data
-            .map((app) => (app.job && app.job._id) ? app.job._id : app.job)
-            .filter(Boolean);
-          setAppliedJobIds(ids);
-        }
-      })
-      .catch((err) => console.error("Error fetching user applications:", err));
+        .then((res) => res.json())
+        .then((data) => {
+          if (Array.isArray(data)) {
+            const ids = data
+              .map((app) => (app.job && app.job._id) ? app.job._id : app.job)
+              .filter(Boolean);
+            setAppliedJobIds(ids);
+          }
+        })
+        .catch((err) => console.error("Error fetching user applications:", err));
     } else {
       setAppliedJobIds([]);
     }
@@ -113,53 +156,115 @@ function Jobs() {
     }
   };
 
+  const filteredJobs = jobs.filter((job) => {
+    const query = search.toLowerCase();
+    return (
+      job.title.toLowerCase().includes(query) ||
+      job.company.toLowerCase().includes(query) ||
+      (job.location || "").toLowerCase().includes(query)
+    );
+  });
+
+  const selectedJob = jobs.find((j) => j._id === selectedJobId) || filteredJobs[0];
+
   return (
-    <div className="page-wrapper" style={{ alignItems: "flex-start", padding: "2rem" }}>
-      <div style={{ width: "100%", maxWidth: "800px", margin: "0 auto" }}>
+    <div style={{ backgroundColor: "#f8fafc", minHeight: "calc(100vh - 70px)", padding: "2rem 1.5rem" }}>
+      <div className="jobs-split-container">
         
-        <h2 style={{ color: "#0f172a", marginBottom: "1.5rem" }}>Available Jobs</h2>
-        
-        <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-          {jobs.length === 0 ? (
-            <p>No jobs available right now.</p>
-          ) : (
-            jobs.map((job) => {
-              const hasApplied = appliedJobIds.includes(job._id);
-              return (
-                <div 
-                  key={job._id} 
-                  className="card" 
-                  style={{ 
-                    maxWidth: "100%", 
-                    padding: "1.5rem", 
-                    display: "flex", 
-                    justifyContent: "space-between", 
-                    alignItems: "center",
-                    borderColor: hasApplied ? "#bbf7d0" : "var(--border)",
-                    backgroundColor: hasApplied ? "#f0fdf4" : "var(--card-bg)",
-                    transition: "all 0.2s ease"
-                  }}
-                >
+        {/* Left Pane - List of Jobs */}
+        <div style={{ flex: 1.1, display: "flex", flexDirection: "column" }}>
+          <div className="job-search-box">
+            <span className="job-search-icon">
+              <IconSearch />
+            </span>
+            <input
+              type="text"
+              placeholder="Search by job title, company, or location..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="job-search-input"
+            />
+          </div>
+
+          <div className="jobs-list-pane">
+            {filteredJobs.length === 0 ? (
+              <div className="card" style={{ maxWidth: "100%", padding: "2.5rem", textAlign: "center" }}>
+                <p style={{ color: "var(--text-light)", margin: 0 }}>No jobs matching your search.</p>
+              </div>
+            ) : (
+              filteredJobs.map((job) => {
+                const hasApplied = appliedJobIds.includes(job._id);
+                const isActive = selectedJob && selectedJob._id === job._id;
+                return (
+                  <div
+                    key={job._id}
+                    className={`job-card-interactive ${isActive ? "active" : ""}`}
+                    onClick={() => setSelectedJobId(job._id)}
+                  >
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+                      <h3 style={{ margin: "0 0 0.25rem", color: "var(--text-main)", fontSize: "1.05rem", fontWeight: "600" }}>
+                        {job.title}
+                      </h3>
+                      {hasApplied && (
+                        <span style={{
+                          backgroundColor: "#dcfce7",
+                          color: "#166534",
+                          padding: "0.2rem 0.5rem",
+                          borderRadius: "9999px",
+                          fontSize: "0.72rem",
+                          fontWeight: "700",
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "0.25rem"
+                        }}>
+                          <IconCheck /> Applied
+                        </span>
+                      )}
+                    </div>
+                    <div style={{ color: "var(--primary)", fontWeight: "500", fontSize: "0.88rem" }}>
+                      {job.company}
+                    </div>
+                    <div style={{ display: "flex", gap: "1rem", marginTop: "0.25rem", fontSize: "0.82rem", color: "var(--text-light)" }}>
+                      <span>
+                        <IconMapPin />
+                        {job.location || "Not specified"}
+                      </span>
+                      {job.salary && (
+                        <span>
+                          <IconDollar />
+                          {job.salary}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                );
+              })
+            )}
+          </div>
+        </div>
+
+        {/* Right Pane - Job Details */}
+        <div className="jobs-detail-pane">
+          {selectedJob ? (
+            <>
+              <div className="job-detail-header">
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
                   <div>
-                    <h3 style={{ marginTop: 0, color: "#4f46e5", fontSize: "1.25rem" }}>
-                      {job.title}
-                    </h3>
-                    <p style={{ margin: "0.5rem 0", color: "#64748b" }}>
-                      <strong>Company:</strong> {job.company}
-                    </p>
-                    <p style={{ margin: "0.5rem 0", color: "#64748b" }}>
-                      <strong>Location:</strong> {job.location}
+                    <h2 style={{ margin: "0 0 0.5rem", color: "var(--text-main)", fontSize: "1.45rem", fontWeight: "700" }}>
+                      {selectedJob.title}
+                    </h2>
+                    <p style={{ margin: "0 0 1rem", fontSize: "1.05rem", color: "var(--primary)", fontWeight: "600" }}>
+                      {selectedJob.company}
                     </p>
                   </div>
-                  
-                  {/* Only show apply button for regular users, not employers */}
+
                   {(!user || String(user.role).toUpperCase() === "USER") && (
-                    hasApplied ? (
-                      <button 
+                    appliedJobIds.includes(selectedJob._id) ? (
+                      <button
                         disabled
                         className="btn-secondary"
-                        style={{ 
-                          padding: "0.5rem 1.5rem", 
+                        style={{
+                          padding: "0.6rem 1.4rem",
                           height: "fit-content",
                           backgroundColor: "#dcfce7",
                           color: "#166534",
@@ -169,29 +274,67 @@ function Jobs() {
                           cursor: "not-allowed",
                           display: "flex",
                           alignItems: "center",
-                          gap: "0.5rem"
+                          gap: "0.5rem",
+                          fontSize: "0.9rem"
                         }}
                       >
-                        <svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor" style={{ flexShrink: 0 }}>
-                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l5-5z" clipRule="evenodd" />
-                        </svg>
+                        <IconCheck />
                         Applied
                       </button>
                     ) : (
-                      <button 
-                        onClick={() => handleApply(job._id)}
+                      <button
+                        onClick={() => handleApply(selectedJob._id)}
                         className="btn-primary"
-                        style={{ padding: "0.5rem 1.5rem", height: "fit-content" }}
+                        style={{ padding: "0.6rem 1.4rem", height: "fit-content", fontSize: "0.9rem", marginTop: 0 }}
                       >
                         Apply Now
                       </button>
                     )
                   )}
                 </div>
-              );
-            })
+
+                <div style={{ display: "flex", flexWrap: "wrap", gap: "1.5rem", marginTop: "0.5rem", borderTop: "1px solid #f1f5f9", paddingTop: "1rem" }}>
+                  <div style={{ display: "flex", alignItems: "center", fontSize: "0.88rem", color: "var(--text-light)" }}>
+                    <IconMapPin />
+                    <strong style={{ color: "var(--text-main)", marginRight: "0.25rem" }}>Location: </strong>
+                    {selectedJob.location || "Not specified"}
+                  </div>
+                  {selectedJob.salary && (
+                    <div style={{ display: "flex", alignItems: "center", fontSize: "0.88rem", color: "var(--text-light)" }}>
+                      <IconDollar />
+                      <strong style={{ color: "var(--text-main)", marginRight: "0.25rem" }}>Salary: </strong>
+                      {selectedJob.salary}
+                    </div>
+                  )}
+                  <div style={{ display: "flex", alignItems: "center", fontSize: "0.88rem", color: "var(--text-light)" }}>
+                    <IconBriefcase />
+                    <strong style={{ color: "var(--text-main)", marginRight: "0.25rem" }}>Type: </strong>
+                    Full-Time
+                  </div>
+                </div>
+              </div>
+
+              <div className="job-detail-body">
+                <h3 style={{ margin: "0 0 0.75rem", fontSize: "1.1rem", fontWeight: "600", color: "var(--text-main)" }}>
+                  Job Description
+                </h3>
+                <div style={{ whiteSpace: "pre-wrap", color: "#475569", fontSize: "0.95rem", lineHeight: 1.7 }}>
+                  {selectedJob.description}
+                </div>
+              </div>
+            </>
+          ) : (
+            <div className="jobs-detail-placeholder">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="2" y="7" width="20" height="14" rx="2" ry="2" />
+                <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
+              </svg>
+              <h3>No Job Selected</h3>
+              <p>Choose one of the available job listings on the left to review its details and submit your application.</p>
+            </div>
           )}
         </div>
+
       </div>
     </div>
   );
