@@ -104,9 +104,11 @@ function Login() {
         role: data.role
       });
 
-      // Navigate to admin panel if they are a COMPANY or ADMIN
-      if (data.role === "COMPANY" || data.role === "ADMIN") {
+      // Navigate based on role
+      if (data.role === "ADMIN") {
         navigate("/admin");
+      } else if (data.role === "COMPANY") {
+        navigate("/company");
       } else {
         navigate("/");
       }

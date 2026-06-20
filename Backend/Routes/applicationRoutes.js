@@ -39,28 +39,28 @@ const router = express.Router();
 router.post(
   "/:jobId",
   authMiddleware,
-  roleMiddleware(["USER"]),
+  roleMiddleware("USER"),
   applyJob
 );
 
 router.get(
   "/my",
   authMiddleware,
-  roleMiddleware(["USER"]),
+  roleMiddleware("USER"),
   getMyApplications
 );
 
 router.get(
   "/job/:jobId",
   authMiddleware,
-  roleMiddleware(["COMPANY"]),
+  roleMiddleware("COMPANY"),
   getJobApplicants
 );
 
 router.put(
   "/:applicationId/status",
   authMiddleware,
-  roleMiddleware(["COMPANY"]),
+  roleMiddleware("COMPANY"),
   updateApplicationStatus
 );
 

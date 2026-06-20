@@ -82,12 +82,17 @@ function Navbar() {
           <>
             <Link to="/">Jobs</Link>
             
-            {/* Show Admin link for both Admin and Company roles */}
-            {(user.role === "ADMIN" || user.role === "COMPANY") && (
-              <Link to="/admin">Dashboard</Link>
+            {/* Admin panel link for ADMIN role only */}
+            {user.role === "ADMIN" && (
+              <Link to="/admin">Admin Panel</Link>
             )}
 
-            {/* Show My Applications link for User role */}
+            {/* Company dashboard link for COMPANY role */}
+            {user.role === "COMPANY" && (
+              <Link to="/company">My Dashboard</Link>
+            )}
+
+            {/* My Applications link for USER role */}
             {user.role === "USER" && (
               <Link to="/dashboard">My Applications</Link>
             )}

@@ -43,6 +43,7 @@ export const authMiddleware = async (req, res, next) => {
  */
 
 export const roleMiddleware = (...allowedRoles) => {
+  const roles = allowedRoles.flat();
   return (req, res, next) => {
     try {
       if (!req.user) {
@@ -52,7 +53,7 @@ export const roleMiddleware = (...allowedRoles) => {
         });
       }
 
-      if (!allowedRoles.includes(req.user.role)) {
+      if (!roles.includes(req.user.role)) {
         return res.status(403).json({
           success: false,
           message: "Forbidden. Insufficient permissions.",

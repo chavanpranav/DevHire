@@ -6,7 +6,8 @@ import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import Jobs from "./pages/Jobs";
 import Admin from "./pages/Admin";
-import UserDashboard from "./pages/UserDashboard"; // <-- Add this line right here!
+import CompanyDashboard from "./pages/CompanyDashboard";
+import UserDashboard from "./pages/UserDashboard";
 import Navbar from "./components/Navbar";
 
 function App() {
@@ -14,25 +15,36 @@ function App() {
 
   return (
     <BrowserRouter>
-      {/* Navbar shows at the top of every page */}
-      <Navbar /> 
-      
-      <Routes>
-        {/* If user is NOT logged in, redirect them to the Login page */}
-        <Route 
-          path="/" 
-          element={user ? <Jobs /> : <Navigate to="/login" />} 
-        />
-        
-        {/* Separate Auth Pages */}
-        <Route path="/login" element={<Login />} />
-        <Route path="/signup" element={<Signup />} />
-        
-        {/* Admin/Company Page */}
-        <Route path="/admin" element={user && (user.role === "ADMIN" || user.role === "COMPANY") ? <Admin /> : <Navigate to="/" />} />
+      <Navbar />
 
-        {/* User Dashboard Page */}
-        <Route path="/dashboard" element={user && user.role === "USER" ? <UserDashboard /> : <Navigate to="/" />} />
+      <Routes>
+        {/* Public job listing — redirect to login if not logged in */}
+        <Route
+          path="/"
+          element={user ? <Jobs /> : <Navigate to="/login" />}
+        />
+
+        {/* Auth pages */}
+        <Route path="/login"  element={<Login />} />
+        <Route path="/signup" element={<Signup />} />
+
+        {/* Admin Panel — ADMIN role only */}
+        <Route
+          path="/admin"
+          element={user && user.role === "ADMIN" ? <Admin /> : <Navigate to="/" />}
+        />
+
+        {/* Company Dashboard — COMPANY role only */}
+        <Route
+          path="/company"
+          element={user && user.role === "COMPANY" ? <CompanyDashboard /> : <Navigate to="/" />}
+        />
+
+        {/* User Dashboard — USER role only */}
+        <Route
+          path="/dashboard"
+          element={user && user.role === "USER" ? <UserDashboard /> : <Navigate to="/" />}
+        />
       </Routes>
     </BrowserRouter>
   );
