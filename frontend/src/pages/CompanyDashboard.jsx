@@ -410,6 +410,7 @@ function CompanyDashboard() {
                         <th>Applicant</th>
                         <th>Email</th>
                         <th>Applied On</th>
+                        <th>Resume</th>
                         <th>Status</th>
                         <th>Update Status</th>
                       </tr>
@@ -425,6 +426,36 @@ function CompanyDashboard() {
                             <td style={{ color: "var(--admin-muted)" }}>{app.applicant?.email || "—"}</td>
                             <td style={{ color: "var(--admin-muted)", fontSize: "0.82rem" }}>
                               {new Date(app.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                            </td>
+                            <td>
+                              {app.resume ? (
+                                <a
+                                  href={app.resume}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  download={`resume_${app.applicant?.name || "applicant"}.pdf`}
+                                  style={{
+                                    display: "inline-flex",
+                                    alignItems: "center",
+                                    gap: "0.35rem",
+                                    backgroundColor: "#ede9fe",
+                                    color: "#5b21b6",
+                                    padding: "0.35rem 0.75rem",
+                                    borderRadius: "6px",
+                                    fontSize: "0.78rem",
+                                    fontWeight: "600",
+                                    textDecoration: "none",
+                                    border: "1px solid #ddd6fe"
+                                  }}
+                                >
+                                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" />
+                                  </svg>
+                                  View Resume
+                                </a>
+                              ) : (
+                                <span style={{ color: "var(--admin-muted)", fontSize: "0.8rem", fontStyle: "italic" }}>No resume</span>
+                              )}
                             </td>
                             <td>
                               <span style={{

@@ -25,6 +25,11 @@ const applicationSchema = new mongoose.Schema(
       ],
       default: "APPLIED",
     },
+
+    resume: {
+      type: String,
+      required: true,
+    },
   },
   {
     timestamps: true,

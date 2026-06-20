@@ -74,13 +74,20 @@
 
 
 import Application from "../Models/Application.js";
-import Job from "../Models/job.js";
+import Job from "../Models/Job.js";
 import Company from "../Models/Company.js";
 
 export const applyJob = async (req, res) => {
   try {
     const userId = req.user.id;
     const jobId = req.params.jobId;
+    const { resume } = req.body;
+
+    if (!resume) {
+      return res.status(400).json({
+        message: "Resume upload is required to apply.",
+      });
+    }
 
     const job = await Job.findById(jobId);
 
@@ -106,6 +113,7 @@ export const applyJob = async (req, res) => {
       await Application.create({
         applicant: userId,
         job: jobId,
+        resume: resume,
       });
 
     res.status(201).json({

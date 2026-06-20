@@ -85,11 +85,119 @@ const IconCheck = () => (
   </svg>
 );
 
+const SubmitApplicationModal = ({ job, onSubmit, onCancel }) => {
+  const [fileName, setFileName] = useState("");
+  const [base64, setBase64] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const handleFileChange = (e) => {
+    const selectedFile = e.target.files[0];
+    if (!selectedFile) return;
+
+    setFileName(selectedFile.name);
+    setError("");
+
+    const reader = new FileReader();
+    reader.onloadstart = () => setLoading(true);
+    reader.onload = () => {
+      setBase64(reader.result);
+      setLoading(false);
+    };
+    reader.onerror = () => {
+      setError("Failed to read file.");
+      setLoading(false);
+    };
+    reader.readAsDataURL(selectedFile);
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (!base64) {
+      setError("Please select a resume file first.");
+      return;
+    }
+    onSubmit(job._id, base64);
+  };
+
+  return (
+    <div className="admin-modal-overlay" onClick={onCancel}>
+      <div className="admin-modal" style={{ maxWidth: "420px" }} onClick={(e) => e.stopPropagation()}>
+        <h3 style={{ margin: "0 0 0.5rem", color: "var(--text-main)", fontSize: "1.2rem", fontWeight: "700" }}>Submit Application</h3>
+        <p style={{ color: "var(--text-light)", fontSize: "0.85rem", marginBottom: "1.2rem", lineHeight: "1.4" }}>
+          Apply to <strong>{job.title}</strong> at <strong>{job.company}</strong> by uploading your resume.
+        </p>
+
+        {error && (
+          <div style={{ backgroundColor: "#fee2e2", color: "#991b1b", padding: "0.75rem", borderRadius: "8px", fontSize: "0.85rem", marginBottom: "1rem", fontWeight: "500" }}>
+            {error}
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit}>
+          <div style={{ display: "flex", flexDirection: "column", marginBottom: "1.5rem" }}>
+            <label style={{ fontSize: "0.78rem", fontWeight: "600", color: "var(--text-light)", marginBottom: "0.5rem" }}>
+              Upload Resume (PDF, DOC, or DOCX)
+            </label>
+            
+            <div 
+              style={{
+                border: "2px dashed var(--border)",
+                borderRadius: "10px",
+                padding: "2rem 1.5rem",
+                textAlign: "center",
+                cursor: "pointer",
+                position: "relative",
+                backgroundColor: "#fafbfc",
+                transition: "all 0.2s"
+              }}
+              onDragOver={(e) => e.preventDefault()}
+              onClick={() => document.getElementById("resume-file-input").click()}
+            >
+              <input 
+                id="resume-file-input"
+                type="file" 
+                accept=".pdf,.doc,.docx"
+                onChange={handleFileChange}
+                style={{ display: "none" }}
+                required
+              />
+              
+              <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ color: "var(--text-light)", marginBottom: "0.75rem" }}>
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                <polyline points="17 8 12 3 7 8" />
+                <line x1="12" y1="3" x2="12" y2="15" />
+              </svg>
+              
+              <p style={{ margin: 0, fontSize: "0.88rem", fontWeight: "500", color: "var(--text-main)" }}>
+                {fileName ? fileName : "Click to select a file"}
+              </p>
+              <p style={{ margin: "0.25rem 0 0", fontSize: "0.75rem", color: "var(--text-light)" }}>
+                {fileName ? "File loaded successfully" : "PDF or Word document up to 5MB"}
+              </p>
+            </div>
+          </div>
+
+          <div className="admin-modal-actions">
+            <button type="button" className="admin-modal-cancel" onClick={onCancel} disabled={loading}>
+              Cancel
+            </button>
+            <button type="submit" className="admin-modal-confirm" style={{ backgroundColor: "var(--primary)" }} disabled={loading || !base64}>
+              {loading ? "Reading..." : "Submit Application"}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+};
+
 function Jobs() {
   const [jobs, setJobs] = useState([]);
   const [appliedJobIds, setAppliedJobIds] = useState([]);
   const [search, setSearch] = useState("");
   const [selectedJobId, setSelectedJobId] = useState(null);
+  const [showApplyModal, setShowApplyModal] = useState(null);
   const { user } = useContext(AuthContext);
 
   useEffect(() => {
@@ -128,7 +236,7 @@ function Jobs() {
     }
   }, [user]);
 
-  const handleApply = async (jobId) => {
+  const handleApply = async (jobId, resumeBase64) => {
     if (!user) {
       alert("You must be logged in to apply for jobs!");
       return;
@@ -140,7 +248,8 @@ function Jobs() {
         headers: {
           "Authorization": `Bearer ${user.token}`,
           "Content-Type": "application/json"
-        }
+        },
+        body: JSON.stringify({ resume: resumeBase64 })
       });
 
       const data = await res.json();
@@ -148,6 +257,7 @@ function Jobs() {
       if (res.ok) {
         alert("Application submitted successfully!");
         setAppliedJobIds((prev) => [...prev, jobId]);
+        setShowApplyModal(null);
       } else {
         alert(data.message || "Failed to apply.");
       }
@@ -169,6 +279,13 @@ function Jobs() {
 
   return (
     <div style={{ backgroundColor: "#f8fafc", minHeight: "calc(100vh - 70px)", padding: "2rem 1.5rem" }}>
+      {showApplyModal && (
+        <SubmitApplicationModal
+          job={showApplyModal}
+          onSubmit={handleApply}
+          onCancel={() => setShowApplyModal(null)}
+        />
+      )}
       <div className="jobs-split-container">
         
         {/* Left Pane - List of Jobs */}
@@ -283,7 +400,7 @@ function Jobs() {
                       </button>
                     ) : (
                       <button
-                        onClick={() => handleApply(selectedJob._id)}
+                        onClick={() => setShowApplyModal(selectedJob)}
                         className="btn-primary"
                         style={{ padding: "0.6rem 1.4rem", height: "fit-content", fontSize: "0.9rem", marginTop: 0 }}
                       >
