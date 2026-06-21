@@ -6,7 +6,7 @@ import connectDB from "./Config/db.js";
 import jobRoutes from "./Routes/jobRoutes.js";
 import authRoutes from "./Routes/authRoutes.js";
 import applicationRoutes from "./Routes/applicationRoutes.js";
-import companyRoutes from "./routes/companyRoutes.js";
+import companyRoutes from "./Routes/companyRoutes.js";
 
 
 // Initialize environment variables
