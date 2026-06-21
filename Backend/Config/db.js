@@ -20,7 +20,6 @@ import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
 import User from "../Models/User.js";
 
-const mongoUrl = 'mongodb://127.0.0.1:27017/jobPortalDB';
 
 const seedAdmin = async () => {
   try {
@@ -45,7 +44,7 @@ const seedAdmin = async () => {
 const connectDB = async () => {
   try {
 
-    await mongoose.connect(mongoUrl);
+    await mongoose.connect(process.env.MONGO_URI);
     console.log("DataBase Connection Done!");
     await seedAdmin();
 
