@@ -27,8 +27,8 @@ const router = express.Router();
 router.post(
   "/",
   authMiddleware,
-  // roleMiddleware("COMPANY"),
-  roleMiddleware("ADMIN", "COMPANY"),
+  roleMiddleware("COMPANY"),
+  // roleMiddleware("ADMIN", "COMPANY"),
   createJob
 );
 
@@ -40,24 +40,24 @@ router.get(
 router.get(
   "/company",
   authMiddleware,
-  // roleMiddleware("COMPANY"),
-  roleMiddleware("ADMIN", "COMPANY"),
+  roleMiddleware("COMPANY"),
+  // roleMiddleware("ADMIN", "COMPANY"),
   getCompanyJobs
 );
 
 router.put(
   "/:id",
   authMiddleware,
-  // roleMiddleware("COMPANY"),
-  roleMiddleware("ADMIN", "COMPANY"),
+  roleMiddleware("COMPANY"),
+  // roleMiddleware("ADMIN", "COMPANY"),
   updateJob
 );
 
 router.delete(
   "/:id",
   authMiddleware,
-  // roleMiddleware("COMPANY"),
-  roleMiddleware("ADMIN", "COMPANY"),
+  roleMiddleware("COMPANY"),
+  // roleMiddleware("ADMIN", "COMPANY"),
   deleteJob
 );
 
