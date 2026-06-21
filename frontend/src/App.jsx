@@ -14,7 +14,10 @@ function App() {
   const { user } = useContext(AuthContext);
 
   // Hide global Navbar for ADMIN and COMPANY roles
-  const showNavbar = !user || (user.role !== "ADMIN" && user.role !== "COMPANY");
+  const showNavbar = !user || (
+    String(user.role).toUpperCase() !== "ADMIN" && 
+    String(user.role).toUpperCase() !== "COMPANY"
+  );
 
   return (
     <BrowserRouter>
