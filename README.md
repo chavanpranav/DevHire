@@ -1,201 +1,214 @@
-# DevHire — Job Portal with Role-Based Authentication
+# DevHire — Modern Job Portal & Hiring Platform 🚀
 
-A full-stack application built with **Node.js + Express + MongoDB** (backend) and **React.js** (frontend).  
-This project demonstrates secure authentication, role-based access control, and CRUD operations for job postings.
-
----
-
-## 📌 Project Overview
-
-**DevHire** is a job portal where:
-- Users can register and log in securely.
-- Admins can create, update, and delete job listings.
-- Authenticated users can browse available jobs.
-- APIs are protected using JWT-based authentication.
-
-This project focuses on **clean backend structure and core functionality**, making it highly suitable for demonstrating backend development fundamentals.
+DevHire is a full-stack job portal and hiring management platform built using the **MERN Stack (MongoDB, Express, React, Node.js)**. It features secure JWT-based, role-based authentication (`USER` / `COMPANY` / `ADMIN`), full CRUD capability for job listings, company verification workflows, and an interactive applicant tracking system.
 
 ---
 
-## 🛠️ Tech Stack
+## 📱 User Roles & Features
+
+### 1. Job Seeker (`USER`)
+*   **Browse Jobs**: Access a live feed of all active job listings from various employers.
+*   **Apply to Jobs**: Submit job applications with resumes (PDF or text).
+*   **Track Status**: Check real-time application status updates (`PENDING`, `ACCEPTED`, `REJECTED`) from your personal applicant dashboard.
+
+### 2. Employer (`COMPANY`)
+*   **Company Onboarding**: Register an employer account with company profile details.
+*   **Job Management**: Create, view, update, and delete company-specific job listings.
+*   **Applicant Tracking**: View a list of candidates who applied for your jobs.
+*   **Status Control**: Review resumes and update candidate application status dynamically.
+
+### 3. Administrator (`ADMIN`)
+*   **Company Verification**: View all registered companies and toggle their verification status.
+*   **Platform Statistics**: View aggregate counts (Total Companies, Verified, and Unverified).
+*   **User Management**: Delete companies and their associated user accounts when necessary.
+*   **Pre-seeded Prototype**: Comes with a preconfigured admin account for instant system testing.
+
+---
+
+## 🛠️ Technology Stack
 
 ### Backend
-- Node.js
-- Express.js
-- MongoDB (Mongoose)
-- JSON Web Token (JWT)
-- bcryptjs
+*   **Runtime**: Node.js
+*   **Framework**: Express.js (REST API development)
+*   **Database**: MongoDB & Mongoose (Object Data Modeling)
+*   **Security**: `bcryptjs` (Password hashing) & JSON Web Tokens (`jsonwebtoken` for stateful session tokens)
+*   **CORS**: Configured for secure frontend-backend communication
 
 ### Frontend
-- React.js
-- React Router DOM
+*   **Library**: React.js
+*   **Routing**: React Router DOM (Dynamic SPA Routing & Route Guards)
+*   **State Management**: React Context API (Auth status & user session persistence in `localStorage`)
+*   **Styling**: Custom CSS styling
 
 ---
 
-## 📁 Project Structure
+## 🗄️ Database Models & Schema
+
+### User Model (`User.js`)
+Handles authenticating credentials and authorization roles.
+```javascript
+{
+  name: { type: String, required: true },
+  email: { type: String, required: true, unique: true },
+  password: { type: String, required: true },
+  role: { type: String, enum: ["USER", "COMPANY", "ADMIN"], default: "USER" }
+}
+```
+
+### Company Model (`Company.js`)
+Stores metadata about company accounts. Linked to a parent user profile.
+```javascript
+{
+  user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+  name: { type: String, required: true },
+  description: { type: String, required: true },
+  isVerified: { type: Boolean, default: false }
+}
+```
+
+### Job Model (`Job.js`)
+Stores details of active listings. Linked to the creator and company.
+```javascript
+{
+  title: { type: String, required: true },
+  description: { type: String, required: true },
+  location: { type: String, required: true },
+  salary: { type: String, required: true },
+  company: { type: mongoose.Schema.Types.ObjectId, ref: "Company", required: true },
+  createdBy: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true }
+}
+```
+
+### Application Model (`Application.js`)
+Tracks applicant submissions for job postings.
+```javascript
+{
+  job: { type: mongoose.Schema.Types.ObjectId, ref: "Job", required: true },
+  applicant: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+  resume: { type: String, required: true },
+  status: { type: String, enum: ["PENDING", "ACCEPTED", "REJECTED"], default: "PENDING" }
+}
+```
+
+---
+
+## 🔑 API Reference
+
+**Base Backend URL:** `https://devhire-fm0p.onrender.com/api` (Local fallback: `http://localhost:8080/api`)
+
+### 🔐 Authentication
+| Method | Endpoint | Access | Description |
+| :--- | :--- | :--- | :--- |
+| **POST** | `/signup` | Public | Register a new job seeker (`USER`) |
+| **POST** | `/login` | Public | Log in as any role and receive a JWT token |
+
+### 🏢 Company Management
+| Method | Endpoint | Access | Description |
+| :--- | :--- | :--- | :--- |
+| **POST** | `/company/register` | Public | Register an employer user and company profile |
+| **POST** | `/company/login` | Public | Log in as an employer |
+| **GET** | `/company/all` | Admin | Retrieve all registered company profiles |
+| **GET** | `/company/stats` | Admin | Get metrics (total, verified, unverified companies) |
+| **PATCH** | `/company/:id/verify` | Admin | Toggle `isVerified` status of a company |
+| **DELETE** | `/company/:id` | Admin | Delete a company profile and its linked user account |
+
+### 💼 Job Postings
+| Method | Endpoint | Access | Description |
+| :--- | :--- | :--- | :--- |
+| **POST** | `/jobs` | Company | Create a new job listing |
+| **GET** | `/jobs` | Public | Retrieve all job listings |
+| **GET** | `/jobs/company` | Company | Retrieve jobs posted by the logged-in company |
+| **PUT** | `/jobs/:id` | Company | Edit an existing job listing |
+| **DELETE** | `/jobs/:id` | Company | Delete a job listing |
+
+### 📝 Job Applications
+| Method | Endpoint | Access | Description |
+| :--- | :--- | :--- | :--- |
+| **POST** | `/applications/:jobId` | User | Apply to a job listing with a resume |
+| **GET** | `/applications/my` | User | Retrieve jobs the user has applied to |
+| **GET** | `/applications/job/:jobId`| Company | Retrieve all applicants for a specific job |
+| **PUT** | `/applications/:applicationId/status` | Company | Update application status (`PENDING`/`ACCEPTED`/`REJECTED`) |
+
+---
+
+## 📁 Folder Structure
 
 ```text
 DevHire/
-├── Backend/
+├── backend/
+|   |     
 │   ├── Config/
+│   │   └── db.js                 # DB connection and admin seed logic
+|   |     
 │   ├── Middleware/
+│   │   └── auth.js               # JWT verification & RBAC Middleware
+|   |     
 │   ├── Models/
-│   ├── Routes/
-│   └── server.js
+│   │   ├── Application.js        # Application Schema
+│   │   ├── Company.js            # Company Schema
+│   │   ├── Job.js                # Job Schema
+│   │   └── User.js               # User Schema
+|   |     
+│   ├── controllers/              # Business logic controllers
+|   |     
+│   ├── Routes/                   # Express routes definition
+|   |     
+│   ├── .env                      # Local environment configurations (ignored)
+|   |     
+│   └── server.js                 # Main server entrypoint
 │
-├── frontend/
-│   ├── src/
-│   │   ├── components/
-│   │   └── pages/
-│
-└── README.md
+└── frontend/
+    |     
+    ├── public/
+    |   
+    └── src/
+        ├── components/           # Shared UI components (Navbar, protected route guards)
+        ├── context/              # Auth state context provider
+        ├── pages/                # Pages (Admin, CompanyDashboard, UserDashboard, Login, Jobs, Signup)
+        └── index.js              # React entrypoint
 ```
 
 ---
 
-## 🗄️ Database Schema
+## ⚙️ Local Installation & Setup
 
-### User
-```javascript
-{
-  email: String,        // required, unique
-  password: String,     // hashed using bcrypt
-  role: String          // "user" or "admin"
-}
-```
+Follow these steps to run DevHire on your local machine:
 
-### Job
-```javascript
-{
-  title: String,
-  company: String,
-  location: String,
-  description: String
-}
-```
-
----
-
-## 🔑 API Endpoints
-
-**Base URL:** `http://localhost:8080/api`
-
-| Method | Endpoint | Access | Description |
-| :--- | :--- | :--- | :--- |
-| **POST** | `/signup` | Public | Register a new user |
-| **POST** | `/login` | Public | Login and receive JWT token |
-| **GET** | `/jobs` | Public | Fetch all jobs |
-| **POST** | `/jobs` | Admin | Create a job |
-| **PUT** | `/jobs/:id` | Admin | Update a job |
-| **DELETE** | `/jobs/:id` | Admin | Delete a job |
-
----
-
-## 🔐 Authentication & Authorization
-
-- Passwords are hashed using **bcrypt**.
-- **JWT tokens** are issued on login.
-- Protected routes require: `Authorization: Bearer <token>`
-- Role-based middleware ensures only admins can modify jobs.
-
----
-
-## 🖥️ Frontend Features
-
-- User Signup & Login
-- JWT-based authentication handling
-- Protected routes
-- Job listing page
-- Admin dashboard for job CRUD operations
-
----
-
-## ⚙️ Setup & Installation
-
-**1. Clone Repository**
+### 1. Clone the Repository
 ```bash
 git clone https://github.com/chavanpranav/DevHire.git
 cd DevHire
 ```
 
-**2. Backend Setup**
-```bash
-cd Backend
-npm install
-npm start
+### 2. Configure Environment Variables
+Create a `.env` file inside the `backend/` directory:
+```env
+PORT=8080
+MONGO_URI=your_mongodb_connection_string
+JWT_SECRET=your_jwt_secret_key
 ```
 
-**3. Frontend Setup**
+### 3. Start the Backend Server
+```bash
+cd backend
+npm install
+npm start   # Runs on http://localhost:8080
+```
+*Note: On initial database connection, the system will automatically seed a default administrator account if none exists.*
+
+### 4. Start the Frontend Application
+In a separate terminal:
 ```bash
 cd frontend
 npm install
-npm start
+npm start     # Runs on http://localhost:3000
 ```
 
 ---
 
-## 🔧 Environment Variables (Recommended Improvement)
+## 🔑 Demo & Testing Credentials
+For easy testing during development, the application pre-seeds the following prototype credentials:
 
-Currently, the MongoDB URL and JWT secret may be hardcoded. For better practice, use a `.env` file in your Backend directory:
-
-```env
-PORT=8080
-MONGO_URI=your_mongodb_uri
-JWT_SECRET=your_secret
-```
-
----
-
-## 🔒 Security Practices Implemented
-
-- Password hashing using bcrypt
-- JWT-based authentication
-- Role-based access control
-- Basic input validation (presence checks)
-- CORS enabled for frontend-backend communication
-
----
-
-## ⚠️ Current Limitations
-
-- No API versioning (`/api/v1` not implemented).
-- No centralized error-handling middleware.
-- Input validation is basic (no dedicated validation library like Joi or Zod).
-- No pagination or filtering in job APIs.
-- No applicant tracking (users cannot apply to jobs directly).
-- No Swagger/Postman documentation included.
-
----
-
-## 📈 Scalability Considerations (Future Scope)
-
-The current system can be extended with:
-- API versioning (`/api/v1`)
-- Pagination and filtering for job listings
-- A complete job application system
-- Redis caching for frequently accessed data
-- Microservices architecture
-- Docker-based deployment
-
----
-
-## ✅ Key Highlights
-
-- Clean backend architecture
-- JWT authentication with role-based access
-- Functional full-stack integration
-- Simple and maintainable code structure
-
----
-
-## 📌 Conclusion
-
-This project demonstrates the fundamentals of:
-- Backend API development
-- Authentication & authorization
-- CRUD operations
-- Full-stack integration
-
-It is designed as a learning-focused and extendable foundation project.
-
----
+*   **Role**: Admin
+*   **Email**: `admin@devhire.com`
+*   **Password**: `admin123`

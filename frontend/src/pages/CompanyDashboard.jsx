@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext } from "react";
+import { useState, useEffect, useContext, useCallback } from "react";
 import { AuthContext } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 
@@ -6,11 +6,11 @@ const BASE_URL = "https://devhire-fm0p.onrender.com";
 
 // ─── Status badge helper ──────────────────────────────────────────────────────
 const STATUS_STYLES = {
-  ACCEPTED:            { bg: "#dcfce7", text: "#166534" },
-  REJECTED:            { bg: "#fee2e2", text: "#991b1b" },
-  UNDER_REVIEW:        { bg: "#fef9c3", text: "#854d0e" },
+  ACCEPTED: { bg: "#dcfce7", text: "#166534" },
+  REJECTED: { bg: "#fee2e2", text: "#991b1b" },
+  UNDER_REVIEW: { bg: "#fef9c3", text: "#854d0e" },
   INTERVIEW_SCHEDULED: { bg: "#ede9fe", text: "#5b21b6" },
-  APPLIED:             { bg: "#e0e7ff", text: "#3730a3" },
+  APPLIED: { bg: "#e0e7ff", text: "#3730a3" },
 };
 
 function getStatusStyle(status) {
@@ -23,20 +23,20 @@ function CompanyDashboard() {
   const navigate = useNavigate();
 
   // Views: "jobs" | "post" | "applicants"
-  const [view, setView]             = useState("jobs");
-  const [jobs, setJobs]             = useState([]);
-  const [loading, setLoading]       = useState(true);
+  const [view, setView] = useState("jobs");
+  const [jobs, setJobs] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [editingJob, setEditingJob] = useState(null);
   const [selectedJob, setSelectedJob] = useState(null);
   const [applicants, setApplicants] = useState([]);
   const [applicantsLoading, setApplicantsLoading] = useState(false);
-  const [toast, setToast]           = useState(null);
+  const [toast, setToast] = useState(null);
 
   // Form state
-  const [title, setTitle]           = useState("");
+  const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [location, setLocation]     = useState("");
-  const [salary, setSalary]         = useState("");
+  const [location, setLocation] = useState("");
+  const [salary, setSalary] = useState("");
 
   const showToast = (msg, type = "success") => {
     setToast({ msg, type });
@@ -44,28 +44,51 @@ function CompanyDashboard() {
   };
 
   // ── Fetch company jobs ──────────────────────────────────────────────────────
-  const fetchJobs = async () => {
-    setLoading(true);
-    try {
-      const res = await fetch(`${BASE_URL}/api/jobs/company`, {
-        headers: { Authorization: `Bearer ${user.token}` },
-      });
-      const data = await res.json();
-      if (Array.isArray(data)) setJobs(data);
-      else showToast("Failed to fetch jobs.", "error");
-    } catch {
-      showToast("Network error.", "error");
-    } finally {
-      setLoading(false);
-    }
-  };
 
-  useEffect(() => { fetchJobs(); }, []);
+  // const fetchJobs = async () => {
+  //   setLoading(true);
+  //   try {
+  //     const res = await fetch(`${BASE_URL}/api/jobs/company`, {
+  //       headers: { Authorization: `Bearer ${user.token}` },
+  //     });
+  //     const data = await res.json();
+  //     if (Array.isArray(data)) setJobs(data);
+  //     else showToast("Failed to fetch jobs.", "error");
+  //   } catch {
+  //     showToast("Network error.", "error");
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+  const fetchJobs = useCallback(async () => {
+  setLoading(true);
+  try {
+    const res = await fetch(`${BASE_URL}/api/jobs/company`, {
+      headers: { Authorization: `Bearer ${user.token}` },
+    });
+
+    const data = await res.json();
+
+    if (Array.isArray(data)) {
+      setJobs(data);
+    } else {
+      showToast("Failed to fetch jobs.", "error");
+    }
+  } catch {
+    showToast("Network error.", "error");
+  } finally {
+    setLoading(false);
+  }
+}, [user.token]);
+
+  useEffect(() => {
+    fetchJobs();
+  }, [fetchJobs]);
 
   // ── Handle post / update ────────────────────────────────────────────────────
   const handleSubmitJob = async (e) => {
     e.preventDefault();
-    const url    = editingJob ? `${BASE_URL}/api/jobs/${editingJob._id}` : `${BASE_URL}/api/jobs`;
+    const url = editingJob ? `${BASE_URL}/api/jobs/${editingJob._id}` : `${BASE_URL}/api/jobs`;
     const method = editingJob ? "PUT" : "POST";
 
     try {
@@ -173,8 +196,8 @@ function CompanyDashboard() {
 
   // ── UI ──────────────────────────────────────────────────────────────────────
   const navItems = [
-    { key: "jobs",  label: "My Jobs" },
-    { key: "post",  label: editingJob ? "Edit Job" : "Post a Job" },
+    { key: "jobs", label: "My Jobs" },
+    { key: "post", label: editingJob ? "Edit Job" : "Post a Job" },
   ];
 
   return (
