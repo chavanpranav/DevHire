@@ -72,7 +72,7 @@ const IconInfo = () => (
   </svg>
 );
 
-const BASE_URL = "http://localhost:8080";
+const BASE_URL = "https://devhire-fm0p.onrender.com";
 
 // ─── Toast ────────────────────────────────────────────────────────────────────
 

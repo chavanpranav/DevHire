@@ -14,8 +14,8 @@ function Signup() {
     e.preventDefault();
 
     const url = role === "COMPANY" 
-      ? "http://localhost:8080/api/company/register" 
-      : "http://localhost:8080/api/signup";
+      ? "https://devhire-fm0p.onrender.com/api/company/register" 
+      : "https://devhire-fm0p.onrender.com/api/signup";
 
     const bodyData = role === "COMPANY"
       ? { name, email, password, companyName, description }

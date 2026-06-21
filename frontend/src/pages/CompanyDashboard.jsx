@@ -2,7 +2,7 @@ import { useState, useEffect, useContext } from "react";
 import { AuthContext } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 
-const BASE_URL = "http://localhost:8080";
+const BASE_URL = "https://devhire-fm0p.onrender.com";
 
 // ─── Status badge helper ──────────────────────────────────────────────────────
 const STATUS_STYLES = {
